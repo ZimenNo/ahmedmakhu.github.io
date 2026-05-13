@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WorkFind — поиск вакансий и сотрудников</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+
+<nav class="nav">
+  <div class="logo" > <a href="#" onclick="showPage('home')">Work<span>Find</span></a></div>
+  <div class="nav-links">
+    <button class="nav-btn active" onclick="showPage('home')">Главная</button>
+    <button class="nav-btn" onclick="showPage('jobs')">Вакансии</button>
+    <button class="nav-btn" onclick="showPage('resumes')">Резюме</button>
+    <button class="nav-btn" id="auth-nav-btn" onclick="openAuthModal()">Войти</button>
+
+    <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" title="Тёмная тема">
+      <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="5"/>
+        <line x1="12" y1="1"     x2="12" y2="3"/>
+        <line x1="12" y1="21"    x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22"   x2="5.64" y2="5.64"/>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1"  y1="12"    x2="3"  y2="12"/>
+        <line x1="21" y1="12"    x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78"  x2="5.64" y2="18.36"/>
+        <line x1="18.36" y1="5.64"  x2="19.78" y2="4.22"/>
+      </svg>
+    </button>
+  </div>
+</nav>
+
+
+<div id="page-home" class="page active">
+  <div class="hero">
+    <h1 class="hero-title-anim">Найдите работу своей мечты</h1>
+    <p class="hero-sub-anim">Тысячи вакансий и резюме в одном месте</p>
+    <div class="search-bar hero-search-anim">
+      <input type="text" id="hero-search"
+             placeholder="Должность, компания или навык..."
+             onkeydown="if(event.key==='Enter') doHeroSearch()" />
+      <button class="btn-primary" onclick="doHeroSearch()">Найти</button>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-num" id="stat-jobs">0</div>
+      <div class="stat-label">Активных вакансий</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-res">0</div>
+      <div class="stat-label">Резюме кандидатов</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-comp">0</div>
+      <div class="stat-label">Компаний</div>
+    </div>
+  </div>
+
+
+  <div class="section-title">Популярные категории</div>
+  <div class="categories-grid" id="categories-grid"></div>
+
+  <div class="section-title">
+    Свежие вакансии
+    <button class="btn-outline" style="font-size:12px;padding:4px 12px"
+            onclick="showPage('jobs')">Все вакансии</button>
+  </div>
+  <div class="cards-grid" id="home-jobs"></div>
+
+  <div class="section-title">Топ компаний</div>
+  <div class="companies-grid" id="companies-grid"></div>
+
+  <div class="section-title">
+    Новые резюме
+    <button class="btn-outline" style="font-size:12px;padding:4px 12px"
+            onclick="showPage('resumes')">Все резюме</button>
+  </div>
+  <div class="cards-grid" id="home-resumes"></div>
+</div>
+
+
+<div id="page-jobs" class="page">
+  <div class="page-header">
+    <h2>Вакансии</h2>
+    <button class="btn-primary" onclick="showPage('post-job')">+ Добавить вакансию</button>
+  </div>
+
+  <input type="text" id="job-search" class="page-search"
+         placeholder="Поиск по вакансиям..." oninput="renderJobs()" />
+
+  <div class="filters">
+    <select class="filter-select" id="f-sphere" onchange="renderJobs()">
+      <option value="">Все сферы</option>
+      <option>IT / Разработка</option>
+      <option>Дизайн</option>
+      <option>Маркетинг</option>
+      <option>Финансы</option>
+      <option>Продажи</option>
+      <option>Административный</option>
+      <option>Образование</option>
+      <option>Другое</option>
+    </select>
+    <select class="filter-select" id="f-type" onchange="renderJobs()">
+      <option value="">Тип занятости</option>
+      <option>Полная занятость</option>
+      <option>Частичная занятость</option>
+      <option>Стажировка</option>
+      <option>Фриланс</option>
+      <option>Удалённо</option>
+    </select>
+    <select class="filter-select" id="f-exp" onchange="renderJobs()">
+      <option value="">Опыт работы</option>
+      <option>Без опыта</option>
+      <option>1–3 года</option>
+      <option>3–5 лет</option>
+      <option>Более 5 лет</option>
+    </select>
+  </div>
+
+  <div class="cards-grid" id="jobs-list"></div>
+</div>
+
+
+<div id="page-resumes" class="page">
+  <div class="page-header">
+    <h2>Резюме кандидатов</h2>
+    <button class="btn-primary" onclick="showPage('post-resume')">+ Добавить резюме</button>
+  </div>
+
+  <input type="text" id="res-search" class="page-search"
+         placeholder="Поиск по резюме..." oninput="renderResumes()" />
+
+  <div class="filters">
+    <select class="filter-select" id="rf-sphere" onchange="renderResumes()">
+      <option value="">Все сферы</option>
+      <option>IT / Разработка</option>
+      <option>Дизайн</option>
+      <option>Маркетинг</option>
+      <option>Финансы</option>
+      <option>Продажи</option>
+      <option>Административный</option>
+      <option>Образование</option>
+      <option>Другое</option>
+    </select>
+    <select class="filter-select" id="rf-exp" onchange="renderResumes()">
+      <option value="">Опыт работы</option>
+      <option>Без опыта</option>
+      <option>1–3 года</option>
+      <option>3–5 лет</option>
+      <option>Более 5 лет</option>
+    </select>
+  </div>
+
+  <div class="cards-grid" id="resumes-list"></div>
+</div>
+
+
+<div id="page-post-job" class="page">
+  <div class="form-wrap">
+    <div class="form-title">Разместить вакансию</div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Название должности *</label>
+        <input id="j-title" type="text" placeholder="Frontend разработчик" />
+      </div>
+      <div class="form-group">
+        <label>Компания *</label>
+        <input id="j-company" type="text" placeholder="ООО Ромашка" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Город</label>
+        <input id="j-city" type="text" placeholder="Бишкек" />
+      </div>
+      <div class="form-group">
+        <label>Зарплата</label>
+        <input id="j-salary" type="text" placeholder="50 000 – 80 000 сом" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Сфера</label>
+        <select id="j-sphere">
+          <option value="">Выберите...</option>
+          <option>IT / Разработка</option>
+          <option>Дизайн</option>
+          <option>Маркетинг</option>
+          <option>Финансы</option>
+          <option>Продажи</option>
+          <option>Административный</option>
+          <option>Образование</option>
+          <option>Другое</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Тип занятости</label>
+        <select id="j-type">
+          <option value="">Выберите...</option>
+          <option>Полная занятость</option>
+          <option>Частичная занятость</option>
+          <option>Стажировка</option>
+          <option>Фриланс</option>
+          <option>Удалённо</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Требуемый опыт</label>
+      <select id="j-exp">
+        <option value="">Выберите...</option>
+        <option>Без опыта</option>
+        <option>1–3 года</option>
+        <option>3–5 лет</option>
+        <option>Более 5 лет</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Описание вакансии *</label>
+      <textarea id="j-desc"
+                placeholder="Опишите обязанности, требования и условия работы..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Контактный e-mail *</label>
+      <input id="j-email" type="email" placeholder="hr@company.com" />
+    </div>
+
+    <div class="form-actions">
+      <button class="btn-outline" onclick="showPage('jobs')">Отмена</button>
+      <button class="btn-primary" onclick="submitJob()">Опубликовать вакансию</button>
+    </div>
+  </div>
+</div>
+
+
+<div id="page-post-resume" class="page">
+  <div class="form-wrap">
+    <div class="form-title">Разместить резюме</div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Имя и фамилия *</label>
+        <input id="r-name" type="text" placeholder="Иван Иванов" />
+      </div>
+      <div class="form-group">
+        <label>Желаемая должность *</label>
+        <input id="r-position" type="text" placeholder="React разработчик" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Город</label>
+        <input id="r-city" type="text" placeholder="Бишкек" />
+      </div>
+      <div class="form-group">
+        <label>Ожидаемая зарплата</label>
+        <input id="r-salary" type="text" placeholder="60 000 сом" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Сфера</label>
+        <select id="r-sphere">
+          <option value="">Выберите...</option>
+          <option>IT / Разработка</option>
+          <option>Дизайн</option>
+          <option>Маркетинг</option>
+          <option>Финансы</option>
+          <option>Продажи</option>
+          <option>Административный</option>
+          <option>Образование</option>
+          <option>Другое</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Опыт работы</label>
+        <select id="r-exp">
+          <option value="">Выберите...</option>
+          <option>Без опыта</option>
+          <option>1–3 года</option>
+          <option>3–5 лет</option>
+          <option>Более 5 лет</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Образование</label>
+      <input id="r-edu" type="text" placeholder="КРСУ, Информационные системы, 2020" />
+    </div>
+
+    <div class="form-group">
+      <label>Навыки</label>
+      <input id="r-skills" type="text" placeholder="JavaScript, React, Node.js, Git..." />
+    </div>
+
+    <div class="form-group">
+      <label>О себе *</label>
+      <textarea id="r-about"
+                placeholder="Расскажите о своём опыте, достижениях и целях..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Контактный e-mail *</label>
+      <input id="r-email" type="email" placeholder="ivan@mail.com" />
+    </div>
+
+    <div class="form-actions">
+      <button class="btn-outline" onclick="showPage('resumes')">Отмена</button>
+      <button class="btn-primary" onclick="submitResume()">Опубликовать резюме</button>
+    </div>
+  </div>
+</div>
+
+
+<div id="job-modal" class="modal-bg"
+     onclick="if(event.target===this) closeModal('job-modal')">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="m-title"></div>
+        <div style="color:var(--accent-text);font-size:13px;margin-top:2px"
+             id="m-company"></div>
+      </div>
+      <button class="close-btn" onclick="closeModal('job-modal')">×</button>
+    </div>
+    <div id="m-body"></div>
+  </div>
+</div>
+
+
+<div id="res-modal" class="modal-bg"
+     onclick="if(event.target===this) closeModal('res-modal')">
+  <div class="modal">
+    <div class="modal-header">
+      <div style="display:flex;gap:10px;align-items:center">
+        <div class="avatar" id="rm-avatar"></div>
+        <div>
+          <div class="modal-title" id="rm-name"></div>
+          <div style="color:var(--text-secondary);font-size:12px" id="rm-pos"></div>
+        </div>
+      </div>
+      <button class="close-btn" onclick="closeModal('res-modal')">×</button>
+    </div>
+    <div id="rm-body"></div>
+  </div>
+</div>
+
+
+<div id="auth-modal" class="modal-bg" onclick="if(event.target===this) closeAuthModal()">
+  <div class="modal auth-modal-inner">
+    <div class="auth-modal-header">
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Войти</button>
+        <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Регистрация</button>
+      </div>
+      <button class="close-btn" onclick="closeAuthModal()">×</button>
+    </div>
+
+    <div id="auth-login-panel">
+      <div class="auth-logo-wrap">
+        <div class="auth-logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        </div>
+        <div class="auth-logo-text">Work<span>Find</span></div>
+      </div>
+      <div class="form-group" style="margin-top:18px">
+        <label>E-mail</label>
+        <input id="login-email" type="email" placeholder="your@email.com" />
+      </div>
+      <div class="form-group">
+        <label>Пароль</label>
+        <div class="pass-wrap">
+          <input id="login-pass" type="password" placeholder="••••••••" />
+          <button class="pass-eye" onclick="togglePass('login-pass', this)" tabindex="-1">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div style="text-align:right;margin-bottom:14px">
+        <a href="#" onclick="showToast('Функция в разработке');return false;" style="font-size:12px;color:var(--accent-text);text-decoration:none">Забыли пароль?</a>
+      </div>
+      <button class="btn-primary" style="width:100%;padding:10px" onclick="doLogin()">Войти</button>
+      <div class="auth-divider"><span>или</span></div>
+      <button class="btn-outline auth-social-btn" onclick="showToast('Вход через Google в разработке')">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        Войти через Google
+      </button>
+      <p class="auth-switch-text">Нет аккаунта? <a href="#" onclick="switchAuthTab('register');return false;">Зарегистрироваться</a></p>
+    </div>
+
+
+    <div id="auth-register-panel" style="display:none">
+      <div class="auth-logo-wrap">
+        <div class="auth-logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>
+          </svg>
+        </div>
+        <div class="auth-logo-text">Work<span>Find</span></div>
+      </div>
+      <div class="form-group" style="margin-top:18px">
+        <label>Имя и фамилия</label>
+        <input id="reg-name" type="text" placeholder="Иван Иванов" />
+      </div>
+      <div class="form-group">
+        <label>E-mail</label>
+        <input id="reg-email" type="email" placeholder="your@email.com" />
+      </div>
+      <div class="form-group">
+        <label>Пароль</label>
+        <div class="pass-wrap">
+          <input id="reg-pass" type="password" placeholder="Минимум 6 символов" />
+          <button class="pass-eye" onclick="togglePass('reg-pass', this)" tabindex="-1">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Я ищу</label>
+        <select id="reg-role">
+          <option value="seeker">Работу (соискатель)</option>
+          <option value="employer">Сотрудников (работодатель)</option>
+        </select>
+      </div>
+      <button class="btn-primary" style="width:100%;padding:10px;margin-top:4px" onclick="doRegister()">Создать аккаунт</button>
+      <div class="auth-divider"><span>или</span></div>
+      <button class="btn-outline auth-social-btn" onclick="showToast('Регистрация через Google в разработке')">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        Войти через Google
+      </button>
+      <p class="auth-switch-text">Уже есть аккаунт? <a href="#" onclick="switchAuthTab('login');return false;">Войти</a></p>
+    </div>
+  </div>
+</div>
+
+
+<div id="toast" class="toast"></div>
+
+
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-col">
+      <div class="footer-logo">Work<span>Find</span></div>
+      <p class="footer-about">
+        Платформа для поиска работы и сотрудников в Кыргызстане.
+        Тысячи вакансий и резюме в одном месте.
+      </p>
+    </div>
+
+   
+
+    <div class="footer-col">
+      <div class="footer-title">Работодателям</div>
+      <ul class="footer-links">
+        <li><a href="#" onclick="showPage('post-job');return false;">Добавить вакансию</a></li>
+        <li><a href="#" onclick="showPage('resumes');return false;">Поиск сотрудников</a></li>
+        <li><a href="#" onclick="showToast('Раздел в разработке');return false;">Тарифы</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <div class="footer-title">Контакты</div>
+      <ul class="footer-links">
+        <li>📧 info@workfind.kg</li>
+        <li>📞 +996 (550) 234-990</li>
+        <li>📍 Бишкек, Кыргызстан</li>
+      </ul>
+      <div class="footer-socials">
+        <a href="#" onclick="event.preventDefault()" title="Telegram">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg>
+        </a>
+        <a href="#" onclick="event.preventDefault()" title="WhatsApp">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.7.1s-.8.9-.9 1.1c-.2.2-.3.2-.6.1s-1.2-.4-2.3-1.4c-.8-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5s0-.4 0-.5c-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4s-1.1 1.1-1.1 2.6 1.1 3 1.3 3.2c.2.2 2.2 3.4 5.4 4.6.8.3 1.4.5 1.9.6.8.2 1.5.2 2.1.1.6-.1 1.7-.7 2-1.4.3-.7.3-1.3.2-1.4-.1-.1-.3-.2-.6-.3zM12 2C6.5 2 2 6.5 2 12c0 1.8.5 3.5 1.3 5L2 22l5.2-1.4c1.4.8 3.1 1.2 4.8 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2z"/></svg>
+        </a>
+        <a href="#" onclick="event.preventDefault()" title="Instagram">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.4a4 4 0 1 1-7.9 1.2 4 4 0 0 1 7.9-1.2z"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    © 2026 WorkFind. Все права защищены.
+  </div>
+</footer>
+
+
+<script src="main.js"></script>
+
+</body>
+</html>
